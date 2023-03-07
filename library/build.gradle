@@ -3,7 +3,7 @@ plugins {
     id 'com.github.dcendents.android-maven'
 }
 
-group='com.github.1050104186'
+group='com.github.ycnao'
 
 android {
     compileSdkVersion 30
