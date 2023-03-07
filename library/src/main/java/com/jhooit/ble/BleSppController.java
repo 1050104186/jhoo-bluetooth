@@ -24,6 +24,7 @@ public class BleSppController {
     private static int mDataLength;
     private static BluetoothAdapter mBluetoothAdapter;
 
+
     /**
      * 初始化
      *
@@ -34,9 +35,9 @@ public class BleSppController {
      */
     public static void initBleControl(Context context, String devName, String devAddress, int length) {
         mContext = context;
+        mDataLength = length;
         mDeviceName = devName;
         mDeviceAddress = devAddress;
-        mDataLength = length;
         BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
 
@@ -55,20 +56,39 @@ public class BleSppController {
                 if (device.getName() != null) {
                     String name = device.getName();
                     String address = device.getAddress();
-                    if (name.equals(mDeviceName) && address.equals(mDeviceAddress)) {
-                        DeviceInfo deviceInfo = new DeviceInfo();
-                        deviceInfo.setName(device.getName());
-                        deviceInfo.setAddress(device.getAddress());
-                        deviceInfo.setLength(mDataLength);
-                        //初始化
-                        BleSppHelper init = BleSppHandler.init(mContext, deviceInfo);
-                        //构造连接
-                        init.createConnect();
-                        init.registerReceiver();
-                        mBluetoothAdapter.stopLeScan(this);
+                    if (mDeviceAddress == null) {
+                        //匹配名字
+                        if (name.equals(mDeviceName)) {
+                            initBleSpp(name, address);
+                            mBluetoothAdapter.stopLeScan(this);
+                        }
+                    } else {
+                        //精准匹配
+                        if (name.equals(mDeviceName) && address.equals(mDeviceAddress)) {
+                            initBleSpp(name, address);
+                            mBluetoothAdapter.stopLeScan(this);
+                        }
                     }
                 }
             }
         });
+    }
+
+    /**
+     * 初始化
+     *
+     * @param name
+     * @param address
+     */
+    private static void initBleSpp(String name, String address) {
+        DeviceInfo deviceInfo = new DeviceInfo();
+        deviceInfo.setName(name);
+        deviceInfo.setAddress(address);
+        deviceInfo.setLength(mDataLength);
+        //初始化
+        BleSppHelper init = BleSppHandler.init(mContext, deviceInfo);
+        //构造连接
+        init.createConnect();
+        init.registerReceiver();
     }
 }
